@@ -42,9 +42,9 @@ module.exports.default_schema = () => ({
 
 module.exports.getJson = (uri, cb) => {
     
-    var u = url.parse(uri);
+    const u = url.parse(uri);
 
-    var options = {
+    const options = {
         hostname: u.hostname,
         port: u.port,
         path: u.path,
@@ -55,32 +55,24 @@ module.exports.getJson = (uri, cb) => {
             'Authorization': `OAuth2 ${ACCESS_TOKEN}`
           }
     };
-       
-    var req = https.request(options, function(res) {        
+               
+    var req = https.request(options, function(res) {                        
         let data = [];
-                
-        res.on('data', function(chunk) {            
-            data.push(chunk);
-        });
-
-        res.on('end', function() {
-            cb(null, JSON.parse(Buffer.concat(data).toString('utf8')));
-          });
+        res.on('data', (chunk) => data.push(chunk));
+        res.on('end', () => cb(null, JSON.parse(Buffer.concat(data).toString('utf8'))));          
     });
         
-    req.on('error', function(e) {
-        cb(e, null);
-    });
+    req.on('error', (e) => cb(e, null));
 
     req.end();    
 };
 
 module.exports.postJson = (uri, data, cb) => {
     
-    var u = url.parse(uri);
-    var dataStr = JSON.stringify(data);
+    const u = url.parse(uri);
+    const dataStr = JSON.stringify(data);
 
-    var options = {
+    const options = {
         hostname: u.hostname,
         port: u.port,
         path: u.path,
@@ -92,22 +84,15 @@ module.exports.postJson = (uri, data, cb) => {
             'Content-Length': dataStr.length,
           }
     };
-       
-    var req = https.request(options, function(res) {        
+      
+    
+    var req = https.request(options, function(res) {                        
         let data = [];
-                
-        res.on('data', function(chunk) {            
-            data.push(chunk);
-        });
-
-        res.on('end', function() {
-            cb(null, JSON.parse(Buffer.concat(data).toString('utf8')));
-          });
+        res.on('data', (chunk) => data.push(chunk));
+        res.on('end', () => cb(null, JSON.parse(Buffer.concat(data).toString('utf8'))));          
     });
         
-    req.on('error', function(e) {
-        cb(e, null);
-    });
+    req.on('error', (e) => cb(e, null));
 
     req.write(dataStr);
     req.end();    
