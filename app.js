@@ -9,7 +9,7 @@ const port = process.env.PORT || '3000';
 app.use(express.json());
 
 // Get the Podio Apps on this API
-app.get('/list', async (req, res) => {
+app.get('/list', runAsyncWrapper(async (req, res) => {
  
     let list = [];
 
@@ -30,10 +30,10 @@ app.get('/list', async (req, res) => {
     
     res.send(list);    
              
-});
+}));
 
 // Get the Schema
-app.get('/list/:id/schema', async (req, res) => { 
+app.get('/list/:id/schema', runAsyncWrapper(async (req, res) => { 
     const app = req.params.id;
     const app_id = app.split('|')[1];
 
@@ -58,10 +58,10 @@ app.get('/list/:id/schema', async (req, res) => {
     
     res.send(schema);
 
-});
+}));
 
 // Get the Data
-app.get('/list/:id', async (req, res) => {
+app.get('/list/:id', runAsyncWrapper(async (req, res) => {
     const app = req.params.id;
     const app_id = app.split('|')[1];
     const limit = parseInt(req.query.limit) || 100;
@@ -106,10 +106,10 @@ app.get('/list/:id', async (req, res) => {
             "data": data_rows
         });                                
     
-});
+}));
 
 // ADD Rows
-app.post('/list/:id', (req, res) => {
+app.post('/list/:id', runAsyncWrapper(async (req, res) => {
     const app = req.params.id;
     const body = req.body;
     const key = 'item_id';
@@ -119,10 +119,10 @@ app.post('/list/:id', (req, res) => {
     });
 
     res.send({ success: true });
-});
+}));
 
 // UPDATE Rows
-app.put('/list/:id', (req, res) => {
+app.put('/list/:id', runAsyncWrapper(async (req, res) => {
     const app = req.params.id;
     const body = req.body;
     const key = 'item_id';
@@ -132,10 +132,10 @@ app.put('/list/:id', (req, res) => {
     });
 
     res.send({ success: true });
-});
+}));
 
 // DELETE Rows
-app.delete('/list/:id', (req, res) => {
+app.delete('/list/:id', runAsyncWrapper(async (req, res) => {
     const app = req.params.id;
     const body = req.body;
     const key = 'item_id';
@@ -144,6 +144,18 @@ app.delete('/list/:id', (req, res) => {
     // TODO: Delete Items
 
     res.send({ success: true });
-});
+}));
 
+app.use(errorHandler);
 app.listen(port, () => console.log(`Simego WebAPI for Podio listening on port ${port}!`));
+
+
+function runAsyncWrapper (callback) {
+    return (req, res, next) => {
+      callback(req, res, next).catch(next)
+    }
+}
+
+function errorHandler (err, req, res, next) {
+    res.status(500).send({ error: err });    
+}
