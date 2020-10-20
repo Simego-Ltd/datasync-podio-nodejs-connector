@@ -8,7 +8,15 @@ module.exports.default_schema = () => ({
     "UpdateKeyColumn": "item_id",
     "UpdateKeyColumnDataType": "System.Int32",
     "BlobNameColumnFormat": null,
-    "BlobUrlFormat": null,
+    "BlobUrlFormat": null,    
+    "Configuration": {
+        "ReadOperationMode": "GET",
+        "ReadBatchSize": 50,
+        "UpdateBatchSize": 25,
+        "Parameters":[
+            { "Name": "Space", "Value": "1234" }
+        ]
+    },
     "Columns": [
         {
             "Name": "item_id",
@@ -24,7 +32,7 @@ module.exports.default_schema = () => ({
             "DataType": "System.Int32",
             "MaxLength": 0,
             "AllowNull": true,
-            "Unique": true,
+            "Unique": false,
             "System": false,
             "ReadOnly": false
         },
@@ -33,67 +41,70 @@ module.exports.default_schema = () => ({
             "DataType": "System.String",
             "MaxLength": 0,
             "AllowNull": true,
-            "Unique": true,
+            "Unique": false,
             "System": false,
             "ReadOnly": false
         }
     ]
 });
 
-module.exports.getJson = (uri, cb) => {
-    
-    const u = url.parse(uri);
-
-    const options = {
-        hostname: u.hostname,
-        port: u.port,
-        path: u.path,
-        query: u.query,
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `OAuth2 ${ACCESS_TOKEN}`
-          }
-    };
-               
-    var req = https.request(options, function(res) {                        
-        let data = [];
-        res.on('data', (chunk) => data.push(chunk));
-        res.on('end', () => cb(null, JSON.parse(Buffer.concat(data).toString('utf8'))));          
-    });
+module.exports.getJson = async (uri) => {
+    return new Promise((resolve, reject) => {
         
-    req.on('error', (e) => cb(e, null));
+        const u = url.parse(uri);
 
-    req.end();    
+        const options = {
+            hostname: u.hostname,
+            port: u.port,
+            path: u.path,
+            query: u.query,
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `OAuth2 ${ACCESS_TOKEN}`
+            }
+        };
+                
+        var req = https.request(options, function(res) {                        
+            let data = [];
+            res.on('data', (chunk) => data.push(chunk));
+            res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
+        });
+            
+        req.on('error', (e) => reject(e));
+
+        req.end();            
+    });    
 };
 
-module.exports.postJson = (uri, data, cb) => {
+module.exports.postJson = async (uri, data) => {
+    return new Promise((resolve, reject) => {
     
-    const u = url.parse(uri);
-    const dataStr = JSON.stringify(data);
+        const u = url.parse(uri);
+        const dataStr = JSON.stringify(data);
 
-    const options = {
-        hostname: u.hostname,
-        port: u.port,
-        path: u.path,
-        query: u.query,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `OAuth2 ${ACCESS_TOKEN}`,
-            'Content-Length': dataStr.length,
-          }
-    };
-      
-    
-    var req = https.request(options, function(res) {                        
-        let data = [];
-        res.on('data', (chunk) => data.push(chunk));
-        res.on('end', () => cb(null, JSON.parse(Buffer.concat(data).toString('utf8'))));          
+        const options = {
+            hostname: u.hostname,
+            port: u.port,
+            path: u.path,
+            query: u.query,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `OAuth2 ${ACCESS_TOKEN}`,
+                'Content-Length': dataStr.length,
+            }
+        };
+                
+        var req = https.request(options, function(res) {                        
+            let data = [];
+            res.on('data', (chunk) => data.push(chunk));
+            res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
+        });
+            
+        req.on('error', (e) => reject(e));
+
+        req.write(dataStr);
+        req.end();    
     });
-        
-    req.on('error', (e) => cb(e, null));
-
-    req.write(dataStr);
-    req.end();    
 };
