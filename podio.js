@@ -1,4 +1,3 @@
-var url = require('url');
 var https = require('https');
 
 // TODO: OAuth Authentication (Podio's OAuth2 is a bit different so need a way to handle it)
@@ -48,16 +47,10 @@ module.exports.default_schema = () => ({
     ]
 });
 
-module.exports.getJson = async (uri) => {
+module.exports.getJson = async (url) => {
     return new Promise((resolve, reject) => {
         
-        const u = url.parse(uri);
-
         const options = {
-            hostname: u.hostname,
-            port: u.port,
-            path: u.path,
-            query: u.query,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -65,7 +58,7 @@ module.exports.getJson = async (uri) => {
             }
         };
                 
-        var req = https.request(options, function(res) {                        
+        var req = https.request(url, options, function(res) {                        
             let data = [];
             res.on('data', (chunk) => data.push(chunk));
             res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
@@ -77,17 +70,12 @@ module.exports.getJson = async (uri) => {
     });    
 };
 
-module.exports.postJson = async (uri, data) => {
+module.exports.postJson = async (url, data) => {
     return new Promise((resolve, reject) => {
     
-        const u = url.parse(uri);
         const dataStr = JSON.stringify(data);
 
         const options = {
-            hostname: u.hostname,
-            port: u.port,
-            path: u.path,
-            query: u.query,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -96,7 +84,7 @@ module.exports.postJson = async (uri, data) => {
             }
         };
                 
-        var req = https.request(options, function(res) {                        
+        var req = https.request(url, options, function(res) {                        
             let data = [];
             res.on('data', (chunk) => data.push(chunk));
             res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
