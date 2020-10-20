@@ -152,10 +152,10 @@ app.listen(port, () => console.log(`Simego WebAPI for Podio listening on port ${
 
 function runAsyncWrapper (callback) {
     return (req, res, next) => {
-      callback(req, res, next).catch(next)
+      callback(req, res, next).catch(next); 
     }
 }
 
 function errorHandler (err, req, res, next) {
-    res.status(500).send({ error: err });    
+    res.status(500).send({ error: err.name, message:  err.message, stack: err.stack });    
 }
