@@ -13,13 +13,16 @@ app.get('/list', runAsyncWrapper(async (req, res) => {
  
     let list = [];
 
-    let data = await podio.getJson('https://api.podio.com/org/');
+    let { response, data } = await podio.getJson('https://api.podio.com/org/');
 
-    for(const org of data){
+    if(response.statusCode != 200)
+        res.sendStatus(response.statusCode).send(response.statusMessage);
 
-        for(const space of org.spaces){
+    for(const org of data) {
+
+        for(const space of org.spaces) {
             
-            let space_data = await podio.getJson(`https://api.podio.com/app/space/${space.space_id}/`);
+            let { data: space_data } = await podio.getJson(`https://api.podio.com/app/space/${space.space_id}/`);
 
             space_data.forEach(app => {
                 list.push(`${org.name}-${space.name}-${app.config.name}|${app.app_id}`);                    
@@ -37,7 +40,7 @@ app.get('/list/:id/schema', runAsyncWrapper(async (req, res) => {
     const app = req.params.id;
     const app_id = app.split('|')[1];
 
-    const data = await podio.getJson(`https://api.podio.com/app/${app_id}`);
+    const { response, data } = await podio.getJson(`https://api.podio.com/app/${app_id}`);
                 
     const schema = podio.default_schema();
 
@@ -74,7 +77,7 @@ app.get('/list/:id', runAsyncWrapper(async (req, res) => {
             offset: (start - 1) * limit
     };
 
-    const data = await podio.postJson(uri, options);
+    const { response, data } = await podio.postJson(uri, options);
         
     const total = data.total;    
     const totalpages = Math.ceil(total / limit);

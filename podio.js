@@ -61,7 +61,7 @@ module.exports.getJson = async (url) => {
         var req = https.request(url, options, function(res) {                        
             let data = [];
             res.on('data', (chunk) => data.push(chunk));
-            res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
+            res.on('end', () => resolve({response: res, data: JSON.parse(Buffer.concat(data).toString('utf8'))}));          
         });
             
         req.on('error', (e) => reject(e));
@@ -87,7 +87,7 @@ module.exports.postJson = async (url, data) => {
         var req = https.request(url, options, function(res) {                        
             let data = [];
             res.on('data', (chunk) => data.push(chunk));
-            res.on('end', () => resolve(JSON.parse(Buffer.concat(data).toString('utf8'))));          
+            res.on('end', () => resolve({response: res, data: JSON.parse(Buffer.concat(data).toString('utf8'))}));          
         });
             
         req.on('error', (e) => reject(e));
